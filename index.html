@@ -1,0 +1,185 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>AltServer, -80045 and the 503 | kisnner26</title>
+<meta name="description" content="Why AltServer on macOS 27 stopped signing in to Apple in October 2026, how Apple blocked it twice, and the fix that works: Windows anisette data.">
+<meta property="og:title" content="Apple closed the door on AltServer. Twice.">
+<meta property="og:description" content="A field report on -80045, the 503 HTML page, and the fix proposed to AltStore.">
+<meta property="og:type" content="article">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Anton&family=JetBrains+Mono:wght@400;500&family=Space+Grotesk:wght@400;500&display=swap" rel="stylesheet">
+<style>
+:root{--bg:#0b0b0c;--ink:#f4f1ea;--mute:#8d8a84;--accent:#ff4a1c;--line:rgba(244,241,234,.16)}
+*{box-sizing:border-box;margin:0;padding:0}
+html{background:var(--bg);color:var(--ink);scroll-behavior:smooth}
+body{font:400 16px/1.6 'Space Grotesk',system-ui,sans-serif;-webkit-font-smoothing:antialiased}
+a{color:var(--ink);text-decoration-color:var(--accent);text-underline-offset:3px}
+a:hover{color:var(--accent)}
+.micro{font:500 10px/1.2 'JetBrains Mono',ui-monospace,monospace;letter-spacing:.14em;text-transform:uppercase;color:var(--mute)}
+.display{font:400 clamp(52px,11vw,148px)/.86 'Anton','Barlow Condensed',Impact,sans-serif;text-transform:uppercase;letter-spacing:-.01em}
+.display em{font-style:normal;color:var(--accent)}
+.wrap{max-width:1080px;margin:0 auto;padding:0 24px}
+header.hero{min-height:92vh;display:flex;flex-direction:column;justify-content:space-between;padding:28px 24px 36px;border-bottom:1px solid var(--line)}
+.top,.bot{display:flex;justify-content:space-between;gap:16px;flex-wrap:wrap}
+.hero h1{margin:12vh 0 28px}
+.hero p.lead{max-width:560px;color:#cfcbc2;font-size:17px}
+.btn{display:inline-block;margin-top:28px;background:var(--accent);color:#0b0b0c;padding:14px 22px;border-radius:0;font:500 11px/1 'JetBrains Mono',monospace;letter-spacing:.12em;text-transform:uppercase;text-decoration:none}
+.btn:hover{color:#0b0b0c;filter:brightness(1.08)}
+section{padding:88px 0;border-bottom:1px solid var(--line)}
+section .micro.tag{margin-bottom:22px;display:block}
+h2{font:400 clamp(34px,6vw,68px)/.9 'Anton',Impact,sans-serif;text-transform:uppercase;margin-bottom:28px}
+h2 em{font-style:normal;color:var(--accent)}
+p{max-width:680px;margin-bottom:18px;color:#d9d5cc}
+p strong{color:var(--ink);font-weight:500}
+code{font:400 .88em 'JetBrains Mono',monospace;background:rgba(244,241,234,.08);padding:2px 6px}
+figure{margin:34px 0}
+figure img{display:block;width:100%;height:auto;border:1px solid var(--line)}
+figcaption{margin-top:10px}
+.row{display:grid;grid-template-columns:1fr 1fr;gap:20px;align-items:start}
+.row figure{margin:34px 0 0}
+.phones{display:flex;gap:20px;flex-wrap:wrap;align-items:flex-start}
+.phones figure{flex:1 1 220px;max-width:300px}
+.tw{overflow-x:auto;margin:26px 0;-webkit-overflow-scrolling:touch}
+table{border-collapse:collapse;width:100%;min-width:560px;font:400 13px/1.5 'JetBrains Mono',monospace}
+th,td{border-top:1px solid var(--line);padding:12px 10px;text-align:left;vertical-align:top}
+th{font-weight:500;color:var(--mute);font-size:10px;letter-spacing:.14em;text-transform:uppercase;border-top:0}
+td.bad{color:var(--accent)}
+.svgbox{margin:30px 0;border:1px solid var(--line);padding:18px;overflow-x:auto}
+.svgbox svg{display:block;min-width:640px;width:100%;height:auto}
+.stats{display:grid;grid-template-columns:repeat(auto-fit,minmax(170px,1fr));gap:0;margin:34px 0;border-top:1px solid var(--line)}
+.stat{padding:22px 18px 22px 0;border-bottom:1px solid var(--line)}
+.stat b{display:block;font:400 54px/1 'Anton',sans-serif;color:var(--accent)}
+pre{background:#121214;border:1px solid var(--line);padding:16px;overflow-x:auto;margin:22px 0;font:400 12.5px/1.6 'JetBrains Mono',monospace;color:#d9d5cc}
+footer{padding:44px 0 70px}
+footer .links{display:flex;gap:26px;flex-wrap:wrap;margin-bottom:26px}
+@media(max-width:720px){.row{grid-template-columns:1fr}section{padding:60px 0}.hero h1{margin-top:8vh}}
+@media (prefers-reduced-motion:no-preference){.hero h1 span{display:block;overflow:hidden}.hero h1 span i{display:block;font-style:normal;transform:translateY(105%);animation:up .7s cubic-bezier(.2,.8,.2,1) forwards}.hero h1 span:nth-child(2) i{animation-delay:.09s}.hero h1 span:nth-child(3) i{animation-delay:.18s}@keyframes up{to{transform:none}}}
+</style>
+</head>
+<body>
+
+<header class="hero wrap">
+  <div class="top"><span class="micro">kisnner26 / field notes</span><span class="micro">oct 2026 / macOS 27.2 / altserver 1.8</span></div>
+  <div>
+    <h1 class="display"><span><i>Apple closed</i></span><span><i>the door.</i></span><span><i><em>Twice.</em></i></span></h1>
+    <p class="lead">On October 12, AltServer stopped signing in to Apple on macOS 27. A fix worked for one day, then Apple blocked it too. This is how the failure was traced, what finally passes, and what has been proposed to AltStore.</p>
+    <a class="btn" href="https://github.com/altstoreio/AltStore/pull/1834">Read the pull request &nearr;</a>
+  </div>
+  <div class="bot"><span class="micro">01 / the failure</span><span class="micro">scroll to explore</span><span class="micro">issue #1828</span></div>
+</header>
+
+<section><div class="wrap">
+  <span class="micro tag">01 / the failure</span>
+  <h2>Two errors, <em>one cause.</em></h2>
+  <p>Installing AltStore from AltServer on macOS 27 failed at the very first sign-in request, before Apple ever looked at the password. Hundreds of people hit it in the same few days (<a href="https://github.com/altstoreio/AltStore/issues/1828">altstoreio/AltStore#1828</a>), and the tool that signs in is not the problem: Sideloadly, iloader, SideStore and xtool failed the same way.</p>
+  <figure><img src="assets/error-80045.jpg" alt="AltServer dialog showing Apple.APIError -80045"><figcaption class="micro">oct 12 / apple.apierror -80045 on GsService2, step o=init</figcaption></figure>
+  <p>Two days later the message changed. The sign-in request was now answered with an HTML page, and AltServer tried to read it as a property list:</p>
+  <figure><img src="assets/error-503-html.jpg" alt="AltServer dialog showing NSCocoaErrorDomain 3840, unknown tag html"><figcaption class="micro">oct 15 / nscocoaerrordomain 3840, "encountered unknown tag html"</figcaption></figure>
+  <p>The second error looks unrelated. It is the same door, closed a second time.</p>
+</div></section>
+
+<section><div class="wrap">
+  <span class="micro tag">02 / the timeline</span>
+  <h2>What Apple <em>changed.</em></h2>
+  <p>On macOS 27, AltServer generates its anisette data locally with AnisetteKit, which emulates Android's CoreADI. The anisette headers describe a device, and the <code>X-MMe-Client-Info</code> header describes the client. Apple started checking that the two agree.</p>
+  <div class="svgbox"><svg viewBox="0 0 900 190" role="img" aria-label="Timeline: October 5 works, October 12 error -80045, October 14 HTTP 503 for Android client info, October 15 Windows anisette signs in">
+    <line x1="40" y1="95" x2="860" y2="95" stroke="#8d8a84" stroke-width="1"/>
+    <g font-family="JetBrains Mono, monospace" font-size="11" fill="#8d8a84" letter-spacing="1.2">
+      <circle cx="80" cy="95" r="6" fill="#0b0b0c" stroke="#f4f1ea"/><text x="80" y="62" text-anchor="middle">OCT 5</text><text x="80" y="130" text-anchor="middle" fill="#f4f1ea">SIGN-IN WORKS</text>
+      <circle cx="320" cy="95" r="6" fill="#0b0b0c" stroke="#f4f1ea"/><text x="320" y="62" text-anchor="middle">OCT 12</text><text x="320" y="130" text-anchor="middle" fill="#f4f1ea">-80045 AT INIT</text><text x="320" y="148" text-anchor="middle">ANDROID ANISETTE, MAC CLIENT INFO</text>
+      <circle cx="560" cy="95" r="6" fill="#ff4a1c"/><text x="560" y="62" text-anchor="middle">OCT 14 · 20:50 UTC</text><text x="560" y="130" text-anchor="middle" fill="#ff4a1c">HTTP 503 HTML</text><text x="560" y="148" text-anchor="middle">ANY ANDROID CLIENT INFO</text>
+      <circle cx="810" cy="95" r="6" fill="#ff4a1c"/><text x="810" y="62" text-anchor="middle">OCT 15</text><text x="810" y="130" text-anchor="middle" fill="#ff4a1c">WINDOWS ANISETTE</text><text x="810" y="148" text-anchor="middle">SIGNS IN</text>
+    </g></svg></div>
+  <p>The first block was reported by the anisette server maintainers (<a href="https://github.com/Dadoum/anisette-v3-server/issues/61">anisette-v3-server#61</a>). The community answered it by declaring a Pixel client instead of a Mac, which worked for a few hours. The second block arrived when Apple's edge began answering every Android client info with <code>503 Service Temporarily Unavailable</code>.</p>
+</div></section>
+
+<section><div class="wrap">
+  <span class="micro tag">03 / probing the edge</span>
+  <h2>Ask the server, <em>carefully.</em></h2>
+  <p>To see what Apple accepts, I sent credential-less requests to <code>gsa.apple.com/grandslam/GsService2</code> with only the client info changed and an empty property-list body. These probes say how the edge routes a request, not whether a login would succeed. They produced the picture below on October 15 (measured between 03:40 and 04:30 UTC).</p>
+  <div class="tw"><table>
+    <tr><th>X-MMe-Client-Info</th><th>Response</th><th>Reading</th></tr>
+    <tr><td>&lt;Pixel 7&gt; &lt;Android;14;…&gt;</td><td class="bad">503 HTML, 6 of 6</td><td>blocked at the edge</td></tr>
+    <tr><td>&lt;Pixel 5&gt; / &lt;Pixel 8&gt; variants</td><td class="bad">503 HTML, 6 of 6</td><td>same</td></tr>
+    <tr><td>&lt;MacBookPro…&gt; &lt;macOS;27.2;…&gt; akd</td><td>404 / 429</td><td>reaches the service (and my IP was rate-limited by then)</td></tr>
+    <tr><td>&lt;PC&gt; &lt;Windows;6.2(0,0);9200&gt; iTunes</td><td>404</td><td>reaches the service</td></tr>
+  </table></div>
+  <p>The only recipe confirmed working after the 503 was the one iloader 2.3.8 and isideload 0.4.6 shipped: anisette data generated by <strong>Windows' ADI</strong> (iTunes) on an anisette v3 server, with the client info and user agent that server reports, used for provisioning, for <code>GsService2</code> and for 2FA. A Mac client info is used only to look up the URL bag.</p>
+</div></section>
+
+<section><div class="wrap">
+  <span class="micro tag">04 / a crash that wasn't the bug</span>
+  <h2>The framework <em>that was empty.</em></h2>
+  <p>Porting the fix meant building AltServer with Xcode 27, and the first build that reached Apple crashed on its own: <code>EXC_BAD_ACCESS</code> at address <code>0x0</code>, a call through a null function pointer from inside AltSign, right at the start of the SRP handshake.</p>
+  <p>The faulting call was <code>alt_ccsrp_gp_rfc5054_2048</code>, a symbol AltSign binds lazily through the flat namespace. <code>nm</code> showed it undefined in every framework. It lived in <code>libcorecrypto_static.a</code>, which was built but linked into nothing: with Xcode 27 the <code>AltSign-Dynamic</code> package product is generated as an empty framework, and in older toolchains it carried all that code.</p>
+<pre>$ nm -arch arm64 AltSign.framework/Versions/A/AltSign | grep rfc5054
+                 U _alt_ccsrp_gp_rfc5054_2048
+
+$ clang -dynamiclib -arch arm64 -Wl,-force_load,libcorecrypto_static.a \
+    -undefined dynamic_lookup -o AltSign-Dynamic.framework/Versions/A/AltSign-Dynamic</pre>
+  <p>Rebuilding that one dylib from the static library removed the crash. It is a build issue and is deliberately not part of the pull request.</p>
+</div></section>
+
+<section><div class="wrap">
+  <span class="micro tag">05 / the fix</span>
+  <h2>Sign in <em>as who you are.</em></h2>
+  <p>On macOS 27, AltServer now gets its anisette data from a Windows anisette v3 server instead of AnisetteKit, and signs in with exactly the identity that server reports:</p>
+  <div class="svgbox"><svg viewBox="0 0 1000 220" role="img" aria-label="Flow: AltServer asks the anisette server for client_info, provisions an identity and gets headers, then signs in to gsa.apple.com with the server's client info and user agent">
+    <g font-family="JetBrains Mono, monospace" font-size="11" letter-spacing="1" fill="#f4f1ea">
+      <rect x="30" y="70" width="170" height="80" fill="none" stroke="#f4f1ea"/><text x="115" y="106" text-anchor="middle">ALTSERVER</text><text x="115" y="126" text-anchor="middle" fill="#8d8a84">MACOS 27</text>
+      <rect x="520" y="20" width="200" height="70" fill="none" stroke="#8d8a84"/><text x="620" y="52" text-anchor="middle">ANISETTE V3 SERVER</text><text x="620" y="72" text-anchor="middle" fill="#8d8a84">WINDOWS ADI</text>
+      <rect x="520" y="130" width="200" height="70" fill="none" stroke="#ff4a1c"/><text x="620" y="162" text-anchor="middle" fill="#ff4a1c">GSA.APPLE.COM</text><text x="620" y="182" text-anchor="middle" fill="#8d8a84">GRANDSLAM</text>
+      <line x1="200" y1="95" x2="520" y2="55" stroke="#8d8a84"/><text x="360" y="52" text-anchor="middle" fill="#8d8a84" font-size="10">client_info · provision · headers</text>
+      <line x1="200" y1="125" x2="520" y2="165" stroke="#ff4a1c"/><text x="360" y="186" text-anchor="middle" fill="#ff4a1c" font-size="10">init · SRP · 2FA · apptokens</text>
+      <text x="740" y="58" fill="#8d8a84" font-size="10">identity + OTP, no password</text>
+      <text x="740" y="168" fill="#ff4a1c" font-size="10">client info + UA = the server's</text>
+    </g></svg></div>
+  <div class="tw"><table>
+    <tr><th></th><th>Before</th><th>After</th></tr>
+    <tr><td>Anisette</td><td>Android CoreADI, local (AnisetteKit)</td><td>Windows ADI, anisette v3 server</td></tr>
+    <tr><td>User-Agent</td><td>AuthKit/1 (Macintosh…) (com.apple.dt.Xcode/26.0)</td><td>the server's <code>user_agent</code></td></tr>
+    <tr><td>Extra headers</td><td>none</td><td>Accept, X-Xcode-Version, X-Apple-App-Info, Connection: close</td></tr>
+    <tr><td>cpd</td><td>14 fields, booleans</td><td>9 fields, strings</td></tr>
+    <tr><td>HTTP errors</td><td>plist parse error 3840</td><td>readable HTTP status</td></tr>
+  </table></div>
+  <p>Your Apple ID password and 2FA code go straight to Apple. The anisette server only sees the anisette device identity, as with AltStore's existing remote anisette mode. The change is split into three commits in AltStore and three in AltSign, builds on the 2FA fix from <a href="https://github.com/rileytestut/AltSign/pull/59">AltSign#59</a> and reuses the fetcher from <a href="https://github.com/altstoreio/AltStore/pull/1806">#1806</a>.</p>
+</div></section>
+
+<section><div class="wrap">
+  <span class="micro tag">06 / evidence</span>
+  <h2>It signs in. <em>It installs.</em></h2>
+  <p>Tested on macOS 27.2 with a free Apple ID with 2FA (the code generated on a trusted device, because the SMS option currently fails). Installing AltStore from the downloaded build worked on an iPad Pro and on an iPhone 15 Pro Max; refreshing AltStore from the app worked too.</p>
+  <div class="stats">
+    <div class="stat"><b>26</b><span class="micro">requests during install, all HTTP 200</span></div>
+    <div class="stat"><b>6</b><span class="micro">requests during a refresh, all HTTP 200</span></div>
+    <div class="stat"><b>7</b><span class="micro">days remaining after the refresh</span></div>
+    <div class="stat"><b>1</b><span class="micro">app id used by the refresh (8 to 7)</span></div>
+  </div>
+  <div class="phones">
+    <figure><img src="assets/altstore-ipad.jpg" alt="AltStore My Apps on iPad showing AltStore with 7 days"><figcaption class="micro">ipad pro / ipados 27.2</figcaption></figure>
+    <figure><img src="assets/altstore-iphone.jpg" alt="AltStore My Apps on iPhone showing AltStore with 7 days"><figcaption class="micro">iphone 15 pro max / after refresh</figcaption></figure>
+  </div>
+</div></section>
+
+<section><div class="wrap">
+  <span class="micro tag">07 / limits</span>
+  <h2>What this <em>doesn't</em> do.</h2>
+  <p><strong>It is not universal.</strong> Some accounts still get <code>-80045</code> with the Windows identity (<a href="https://github.com/nab138/iloader/issues/928">nab138/iloader#928</a>), apparently depending on the account or the network. <strong>It depends on a third-party server.</strong> <strong>SMS 2FA</strong> fails on Apple's side. <strong>Refreshing other sideloaded apps</strong> was not tested. And Apple can change the rules again: the first fix lasted less than a day.</p>
+  <p>For people who cannot wait for a merge there is an unofficial, unsigned build, clearly marked temporary, with checksums and the patches it was built from. Read its notes first.</p>
+</div></section>
+
+<footer class="wrap">
+  <div class="links">
+    <a href="https://github.com/altstoreio/AltStore/pull/1834">AltStore pull request #1834 &nearr;</a>
+    <a href="https://github.com/rileytestut/AltSign/pull/61">AltSign pull request #61 &nearr;</a>
+    <a href="https://github.com/kisnner26/AltStore/releases/tag/v1.8-windows-anisette-unofficial">Unofficial build &nearr;</a>
+    <a href="https://github.com/altstoreio/AltStore/issues/1828">Tracking issue #1828 &nearr;</a>
+  </div>
+  <p class="micro" style="max-width:760px;line-height:1.8">Credits: whydr4 (altstoreio/AltStore#1832, AltSign#59), mattaltgear (#1833, AltSign#60), Nick Clyde (#1806, the remote anisette fetcher), nab138 (isideload and iloader, the Windows anisette approach), jkcoxson (anisette server), Dadoum (anisette-v3-server). Not affiliated with AltStore or Apple. Written by kisnner26.</p>
+</footer>
+
+</body>
+</html>
