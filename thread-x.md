@@ -1,6 +1,6 @@
 # hilo para x (inglés, 6 mensajes)
 
-Antes de publicar: reemplaza URL_ARTICULO por la dirección de GitHub Pages. Adjunta la imagen indicada en cada mensaje (están en `assets/`).
+Listo para copiar. Adjunta la imagen indicada en cada mensaje (están en `assets/`).
 
 1/
 AltServer on macOS 27 stopped signing in to Apple on Oct 12. A fix worked for one day. Then Apple blocked that too.
@@ -39,5 +39,5 @@ Tested: sign-in, 2FA, install on an iPad and an iPhone, and an AltStore refresh.
 It is not universal (some accounts still get -80045), it depends on a third-party anisette server, and refreshing other apps is untested.
 
 PR: https://github.com/altstoreio/AltStore/pull/1834
-Write-up: URL_ARTICULO
+Write-up: https://kisnner26.github.io/altserver-80045/
 Credits: whydr4, mattaltgear, Nick Clyde, nab138, jkcoxson.
