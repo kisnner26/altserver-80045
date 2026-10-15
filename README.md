@@ -23,6 +23,6 @@ tested on macos 27.2 with a free apple id with 2fa: sign-in, install on an ipad 
 
 ## the article
 
-the full write-up, with the timeline, the probes against the edge and a crash caused by an empty framework in xcode 27, is in [`index.html`](index.html) (github pages).
+the full write-up, with the timeline, the probes against the edge and a crash caused by an empty framework in xcode 27, is at [kisnner26.github.io/altserver-80045](https://kisnner26.github.io/altserver-80045/) (source in [`index.html`](index.html)). a short version is in this [thread on x](https://x.com/kisnnerc/status/2110793388354158813).
 
 not affiliated with altstore or apple.
