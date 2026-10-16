@@ -19,7 +19,7 @@ field notes on why altserver stopped signing in to apple on macos 27 in october 
 - unofficial build, temporary: [release](https://github.com/kisnner26/AltStore/releases/tag/v1.8-windows-anisette-unofficial)
 - tracking issue: [altstoreio/AltStore#1828](https://github.com/altstoreio/AltStore/issues/1828)
 
-tested on macos 27.2 with a free apple id with 2fa: sign-in, install on an ipad pro and an iphone 15 pro max, and a refresh of altstore (6 requests, all http 200, back to 7 days). not tested by me: refreshing other sideloaded apps; one user reports renewing theirs with the build ([#1828](https://github.com/altstoreio/AltStore/issues/1828#issuecomment-6219065403)). not universal: some accounts still get `-80045` with the windows identity.
+tested on macos 27.2 with a free apple id with 2fa: sign-in, install on an ipad pro and an iphone 15 pro max, and a refresh of altstore (6 requests, all http 200, back to 7 days). not tested: refreshing other sideloaded apps, and no one has confirmed it yet; one user reports signing in and reinstalling an app with the build ([#1828](https://github.com/altstoreio/AltStore/issues/1828#issuecomment-6219925549)). not universal: some accounts still get `-80045` with the windows identity.
 
 ## the article
 
