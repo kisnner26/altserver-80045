@@ -18,8 +18,19 @@ field notes on why altserver stopped signing in to apple on macos 27 in october 
 - altsign: [rileytestut/AltSign#61](https://github.com/rileytestut/AltSign/pull/61)
 - unofficial build, temporary: [release](https://github.com/kisnner26/AltStore/releases/tag/v1.8-windows-anisette-unofficial)
 - tracking issue: [altstoreio/AltStore#1828](https://github.com/altstoreio/AltStore/issues/1828)
+- related: [altstoreio/AltStore#1835](https://github.com/altstoreio/AltStore/pull/1835), by an altstore collaborator. it covers the altstore app on the iphone and is built on top of rileytestut/AltSign#61. the two prs are complementary
 
-tested on macos 27.2 with a free apple id with 2fa: sign-in, install on an ipad pro and an iphone 15 pro max, and a refresh of altstore (6 requests, all http 200, back to 7 days). not tested: refreshing other sideloaded apps, and no one has confirmed it yet; one user reports signing in and reinstalling an app with the build ([#1828](https://github.com/altstoreio/AltStore/issues/1828#issuecomment-6219925549)). not universal: some accounts still get `-80045` with the windows identity.
+tested on macos 27.2 with a free apple id with 2fa: sign-in, install on an ipad pro and an iphone 15 pro max, and a refresh of altstore (6 requests, all http 200, back to 7 days). not universal: some accounts still get `-80045` with the windows identity.
+
+## what others report
+
+public reports, not verified by me:
+
+- [eutudb23](https://github.com/altstoreio/AltStore/issues/1828#issuecomment-6232315194) built altserver from #1834 and reinstalled altstore on macos 27.0.1 with a 2fa account. on the iphone, with only these changes, installing an app still got http 503 until they added an anisette refresh handler in `AuthenticationOperation.swift`. one device, one account
+- [izaankml](https://github.com/altstoreio/AltStore/pull/1835#issuecomment-6247158473) tested altsign#61 (832d9ce) under #1835: on-device refresh works again on an iphone with ios 26.6.2
+- [dmuiX](https://github.com/altstoreio/AltStore/issues/1828#issuecomment-6205653919) still gets `-80045` with the mac route, even with another apple id. it isn't clear whether that was the official altserver or the unofficial build
+
+the unofficial build has about 700 downloads. none of this is a merge: #1834, #1835 and altsign#61 are still open.
 
 ## the article
 
